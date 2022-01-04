@@ -12,6 +12,7 @@ import javafx.fxml.Initializable;
 import be.inf1.bullethell.model.*;
 import be.inf1.bullethell.view.*;
 import java.util.Timer;
+import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.input.KeyCode;
@@ -19,6 +20,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 
 /**
  * FXML Controller class
@@ -27,10 +29,16 @@ import javafx.scene.paint.Color;
  */
 public class GameViewController implements Initializable {
 
-    // we will keep a list of just the views, since we can access the models from there
-    private ArrayList<PlayerAvatarView> playerAvatars;
+    // We don't want to store a list of every possible object here, that would be too unwieldy.
+    // Instead, we store top-level objects from which we can retrieve other objects 
+    // (for example, SpaceshipController gives us the main View and Model for the ships)
+    private ArrayList<SpaceshipController> players;
     private ArrayList<PlayerStatsView> playerStats;
     private ArrayList<KeyboardInput> playerInputs;
+    
+    private ArrayList<SpaceshipController> enemies;
+    
+    private long previousTime = 0;
     
     @FXML
     private AnchorPane levelContainer;
@@ -38,18 +46,26 @@ public class GameViewController implements Initializable {
     @FXML
     private VBox playerList;
     
+    @FXML
+    private Text fpsCounter;
+    private long lastFPSupdate = 0;
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        this.playerAvatars = new ArrayList<PlayerAvatarView>();
+        this.players = new ArrayList<SpaceshipController>();
+        this.enemies = new ArrayList<SpaceshipController>();
         this.playerStats = new ArrayList<PlayerStatsView>();
         this.playerInputs = new ArrayList<KeyboardInput>();
         
+        
         KeyboardInput player1Input = new KeyboardInput( KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE );
-        this.createPlayer("Player 1", Color.RED, new Vector2(100, 100), player1Input );
+        this.createPlayer("Player 1", Color.GREEN, new Vector2(100, 100), player1Input );
         
         KeyboardInput player2Input = new KeyboardInput( KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D, KeyCode.CONTROL );
         this.createPlayer("Player 2", Color.BLUE, new Vector2(100, 300), player2Input );
+        
+        this.createEnemies();
         
         this.levelContainer.setOnKeyPressed(this::keyPressed);
         this.levelContainer.setOnKeyReleased(this::keyReleased);
@@ -59,7 +75,73 @@ public class GameViewController implements Initializable {
         
         Timer t = new Timer();
         t.scheduleAtFixedRate( gameLoop, 0, GameLoop.DELTA_TIME );
-    }    
+        
+        
+        AnimationTimer at = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                long deltaTime = now - previousTime;
+                previousTime = now;
+                
+                if ( now - lastFPSupdate > 500000000 ) { // update each half second
+                
+                    // deltaTime is in nanoseconds, need to first get to ms, then we can get FPS
+                    int FPS = Math.round(1000 / (deltaTime / 1000000));
+
+                    fpsCounter.setText( "FPS: " + FPS );
+                
+                    lastFPSupdate = now;
+                }
+            };
+        };
+        at.start();
+    }
+    
+    private void createPlayer(String name, Color color, Vector2 position, KeyboardInput input) {
+        Player player = new Player( name, Player.MAX_HEALTH, color, position );
+        player.setEnginePower( new Vector2(5,5) );
+        PlayerAvatarView playerAvatar = new PlayerAvatarView(player);
+        PlayerStatsView playerStats = new PlayerStatsView(player);
+        
+        playerAvatar.setup();
+        this.levelContainer.getChildren().add( playerAvatar );
+        
+        playerStats.setup();
+        this.playerList.getChildren().add( playerStats );
+        
+        SpaceshipController playerController = new SpaceshipController( player, playerAvatar, input, this.levelContainer );
+        
+        this.players.add( playerController );
+        this.playerStats.add( playerStats );
+        this.playerInputs.add( input );
+    }
+    
+    private void createEnemies() {
+        
+        Enemy e1 = new Enemy( 5, new Vector2(900, 350)  );
+        e1.setEnginePower( new Vector2(1,2) );
+        AIInput_UpDown ei1 = new AIInput_UpDown();
+        
+        EnemyView_Frigate ev1 = new EnemyView_Frigate( e1 );
+        ev1.setup();
+        
+        SpaceshipController sc1 = new SpaceshipController( e1, ev1, ei1, this.levelContainer );
+        
+        this.levelContainer.getChildren().add( ev1 );
+        this.enemies.add(sc1);
+        
+        
+        Enemy e2 = new Enemy( 10, new Vector2(1100, 350)  );
+        AIInput_Stationary ei2 = new AIInput_Stationary();
+        
+        EnemyView_Dreadnought ev2 = new EnemyView_Dreadnought( e2 );
+        ev2.setup();
+        
+        SpaceshipController sc2 = new SpaceshipController( e2, ev2, ei2, this.levelContainer );
+        
+        this.levelContainer.getChildren().add( ev2 );
+        this.enemies.add(sc2);
+    }
     
     // supposed to be called once per game loop tick (for example 30 times per second)
     public void update() {
@@ -71,58 +153,27 @@ public class GameViewController implements Initializable {
     }
     
     private void updateModels() {
-        for ( int i = 0; i < this.playerInputs.size(); ++i ) {
-            KeyboardInput input = this.playerInputs.get(i);
-            Player player = this.playerAvatars.get(i).getModel();
-            
-            Vector2 velocity = player.getVelocity(); // change the velocity directly
-            // reset velocity to make input really snappy! 
-            // if player stops pressing button, movement in that directly immediately stops (no momentum for now)
-            velocity.x = 0;
-            velocity.y = 0;
-            
-            if ( input.up() ) {
-                velocity.y = -1;
-            }
-            else if ( input.down() ) {
-                velocity.y = 1;
-            }
-            
-            if ( input.left() ) {
-                velocity.x = -1;
-            }
-            else if ( input.right() ) {
-                velocity.x = 1;
-            }
-            
-            player.update();
+        for ( SpaceshipController p : this.players ) {
+            p.updateModels();
+        }
+        
+        for ( SpaceshipController e : this.enemies ) {
+            e.updateModels();
         }
     }
     
     private void updateViews() {
-        for ( PlayerAvatarView v : this.playerAvatars ) {
-            v.update();
+        for ( SpaceshipController p : this.players ) {
+            p.updateViews();
         }
         
         for ( PlayerStatsView v : this.playerStats ) {
             v.update();
         }
-    }
-    
-    private void createPlayer(String name, Color color, Vector2 position, KeyboardInput input) {
-        Player player = new Player( name, Player.MAX_HEALTH, color, position );
-        PlayerAvatarView playerAvatar = new PlayerAvatarView(player);
-        PlayerStatsView playerStats = new PlayerStatsView(player);
         
-        playerAvatar.setup();
-        this.levelContainer.getChildren().add( playerAvatar );
-        
-        playerStats.setup();
-        this.playerList.getChildren().add( playerStats );
-        
-        this.playerAvatars.add( playerAvatar );
-        this.playerStats.add( playerStats );
-        this.playerInputs.add( input );
+        for ( SpaceshipController e : this.enemies ) {
+            e.updateViews();
+        }
     }
     
     private void keyPressed( KeyEvent evt ) {

@@ -11,18 +11,12 @@ import javafx.scene.input.KeyEvent;
  *
  * @author u0143348
  */
-public class KeyboardInput {
+public class KeyboardInput extends SpaceshipInput {
     private KeyCode up;
     private KeyCode down;
     private KeyCode left;
     private KeyCode right;
     private KeyCode fire;
-    
-    private Boolean currentUp;
-    private Boolean currentDown;
-    private Boolean currentLeft;
-    private Boolean currentRight;
-    private Boolean currentFire;
     
     public KeyboardInput(KeyCode up, KeyCode down, KeyCode left, KeyCode right, KeyCode fire) {
         this.up = up;
@@ -30,28 +24,8 @@ public class KeyboardInput {
         this.left = left;
         this.right = right;
         this.fire = fire;
-        
-        this.currentUp = false;
-        this.currentDown = false;
-        this.currentLeft = false;
-        this.currentRight = false;
-        this.currentFire = false;
     }
-   
-    // getters, but without the "get" because that would be boring to write quite quickly
-    public Boolean up() { return this.currentUp; }
-    public Boolean down() { return this.currentDown; }
-    public Boolean left() { return this.currentLeft; }
-    public Boolean right() { return this.currentRight; }
-    public Boolean fire() { 
-        // for shooting, we only want to shoot once for each key press, 
-        // so reset to false every time this is read
-        Boolean hadFired = this.currentFire;
-        this.currentFire = false;
-        
-        return hadFired;
-    }
-    
+
     public void handleKeyPress( KeyEvent e ) {
         KeyCode code = e.getCode();
         

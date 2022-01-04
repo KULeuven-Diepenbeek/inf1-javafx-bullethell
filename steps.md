@@ -24,3 +24,30 @@ Finally, we will have a GameLoop TimerTask that updates the main GameViewControl
 Time needed to complete this step: 80 minutes
 
 Visual rend result: see /recordings/step1_players.gif
+
+# Step 2: Enemy
+
+Secondly, we want to make an Enemy that shoots at us. 
+
+As such, we will need an Enemy model that tracks basic info, as well as a Bullet model.
+Additionally, we need EnemyView and BulletView classes. 
+
+Thinking about this, we can see that the Enemy and Player would share a large amount of logic...
+Both have position, velocity, health, will shoot bullets, etc. 
+The main difference will be how they are controlled (keyboard vs some AI logic).
+As such, we can create new Model/View base classes called Spaceship/SpaceshipView that represent both.
+We then also generalize KeyboardInput to SpaceshipInput, so we can have an AIInput on top as well.
+
+Now, we encounter a problem: we want both the Player and Enemy to be able to shoot bullets.
+Shooting bullets involves creating not just the Bullet Model, but also the Bullet View, so we can't just do this inside the Enemy/Player Model, nor the View classes...
+As such, we add a new SpaceshipController that will help us guide everything.
+
+We know we will want multiple different types of Enemies and Bullets down the line, so we already want to decide here how to handle that.
+To fit with the basic course and teaching inheritance, we will have specific Enemies and Bullets inherit from their base classes. 
+This will be the case both for the Model and View aspects, as well as Input. 
+You can see examples of this in the AIInput_UpDown/Stationary and EnemyView_Frigate/Dreadnought.
+
+Time needed to complete this step: 140 minutes
+
+Visual rend result: see /recordings/step2_enemies.gif
+
