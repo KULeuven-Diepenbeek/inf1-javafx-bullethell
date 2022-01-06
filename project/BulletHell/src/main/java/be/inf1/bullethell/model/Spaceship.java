@@ -10,7 +10,7 @@ package be.inf1.bullethell.model;
  */
 public class Spaceship {
     private int health;
-    private Vector2 position;
+    protected Vector2 position;
     private Vector2 velocity; // current velocity
     private Vector2 direction;
     

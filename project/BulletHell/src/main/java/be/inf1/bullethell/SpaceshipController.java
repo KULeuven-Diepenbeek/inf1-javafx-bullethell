@@ -17,33 +17,15 @@ public class SpaceshipController {
     private Spaceship ship;
     private SpaceshipView view;
     private SpaceshipInput input;
-    private ArrayList<BulletView> bullets; 
     
-    private ArrayList<Bullet> bulletsWaitingForViews;
+    private BulletGenerator bulletGenerator;
     
-    private AnchorPane container;
-    
-    public SpaceshipController(Spaceship ship, SpaceshipView view, SpaceshipInput input, AnchorPane container) {
+    public SpaceshipController(Spaceship ship, SpaceshipView view, SpaceshipInput input, BulletGenerator bulletGenerator) {
         this.ship = ship;
         this.view = view;
         this.input = input;
-        this.container = container;
         
-        this.bullets = new ArrayList<BulletView>();
-        this.bulletsWaitingForViews = new ArrayList<Bullet>();
-    }
-    
-    public void shoot() {
-        Bullet b = new Bullet( new Vector2(this.ship.getPosition().x, this.ship.getPosition().y), 1 );
-        // shoot in the direction you're facing
-        b.getVelocity().x = this.ship.getDirection().x * 10;
-        b.getVelocity().y = this.ship.getDirection().y * 10;
-        
-        // we can't just create and add BulletViews here, sadly...
-        // this because input handling is done in the Timer thread,
-        // while UI updates can only be done in the JavaFX thread
-        // so we keep a list of Bullets without views and add those later in updateViews()
-        this.bulletsWaitingForViews.add( b );
+        this.bulletGenerator = bulletGenerator;
     }
     
     public void updateModels() {
@@ -51,34 +33,14 @@ public class SpaceshipController {
         // the ship itself
         this.input.apply(this.ship); // this only changes velocities, need to handle firing logic separately
         if ( this.input.fire() ) {
-            this.shoot();
+            this.bulletGenerator.shootBullet(this);
         }
         
         this.ship.update();
-        
-        // the bullets
-        for ( BulletView bv : this.bullets ) {
-            bv.getModel().update();
-        }
     }
     
     public void updateViews() {
         this.view.update();
-        
-        for ( Bullet b : this.bulletsWaitingForViews ) {
-        
-            BulletView bv = new BulletView(b);
-            bv.setup();
-
-            bullets.add( bv );
-            this.container.getChildren().add( bv );
-        }
-        
-        this.bulletsWaitingForViews.clear();
-        
-        for ( BulletView bv : this.bullets ) {
-            bv.update();
-        }
     }
     
     public Spaceship getShip() {
@@ -91,5 +53,9 @@ public class SpaceshipController {
 
     public SpaceshipInput getInput() {
         return input;
+    }
+    
+    public BulletGenerator getBulletGenerator() {
+        return this.bulletGenerator;
     }
 }

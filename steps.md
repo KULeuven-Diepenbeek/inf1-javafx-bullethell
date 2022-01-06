@@ -51,3 +51,38 @@ Time needed to complete this step: 140 minutes
 
 Visual rend result: see /recordings/step2_enemies.gif
 
+# Step 3: Bullets
+
+While we already had bullets in the previous Step, they were simple and only visual things, not actually causing damage.
+
+To make the Bullets hit, we also need to implement some basic collision detection logic. 
+We will not put this on either Player, Enemy or even Bullet, but rather have a separate subsystem for this to keep responsibilities clearly separated.
+In the previous Step, we had the SpaceshipController create the Bullets itself, but that's somewhat inflexible.
+For example, what happens to existing bullets if a ship (and thus its SpaceshipController) is destroyed?
+Instead, we use the BulletController to create, move and track the bullets. 
+
+We will also be clever about how we calculate collisions, since not everything collides with everything else.
+Enemy bullets collide with Player ships and vice versa, but nothing else. 
+
+We do Collisions in the Views, not the Models, since the Models don't track the actual size of the objects (only their position/velocity).
+This gives us more flexibility in shaping the Views later on or to implement non-rectangular collisions later (for example, more finegrained triangle hit boxes).
+
+To make the collision system flexible, we use a single Collidable interface. 
+This will make it easy to later also add things like pickups or obstacles (for example asteroids flying through space).
+
+
+Secondly, we also want bullets that explode or that go offscreen to be properly removed.
+If not, they will stay around, taking up memory and processing time. 
+That doesn't matter much at the start, but can lead to severe problems with many bullets/objects if the game goes long.
+
+
+Thirdly, we also want some more complex bullets that don't just move in a straight line 
+(for example, that auto-aim towards the player's position at launch, or that follow sinusoid lines)
+So we create some subclasses of Bullets and make it so that different ships can fire different types of bullets 
+by using the new BulletGenerator class.
+
+
+Time needed to complete this step: 250 minutes (mainly due to quite some design changes throughout)
+
+Visual rend result: see /recordings/step3_bullets.gif
+Visual rend result stress test: see /recordings/step3_bullets_stress.gif

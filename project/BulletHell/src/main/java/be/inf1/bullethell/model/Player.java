@@ -1,5 +1,6 @@
 package be.inf1.bullethell.model;
 
+import be.inf1.bullethell.App;
 import javafx.scene.paint.Color;
 
 /**
@@ -35,5 +36,13 @@ public class Player extends Spaceship {
 
     public void setColor(Color color) {
         this.color = color;
+    }
+    
+    @Override
+    public void update() {
+        super.update();
+        
+        this.position.x = Math.max( 0, Math.min(this.position.x, App.WINDOW_WIDTH - 1));
+        this.position.y = Math.max( 0, Math.min(this.position.y, App.WINDOW_HEIGHT - 1));
     }
 }

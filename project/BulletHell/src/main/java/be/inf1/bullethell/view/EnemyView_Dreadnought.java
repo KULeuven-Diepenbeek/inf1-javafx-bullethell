@@ -4,8 +4,10 @@
  */
 package be.inf1.bullethell.view;
 
+import be.inf1.bullethell.model.Bullet;
 import be.inf1.bullethell.model.Enemy;
 import be.inf1.bullethell.model.Player;
+import be.inf1.bullethell.model.Vector2;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -39,5 +41,27 @@ public class EnemyView_Dreadnought extends SpaceshipView {
         this.getChildren().add(r);
         
         this.update();
+    }
+    
+    @Override
+    public Vector2 getCenterPoint() {
+        return new Vector2( this.model.getPosition().x + EnemyView_Dreadnought.WIDTH / 2, this.model.getPosition().y + EnemyView_Dreadnought.HEIGHT / 2 );
+    }
+    
+    @Override 
+    public boolean collidesWith(Vector2 testPoint) {
+        
+        if ( testPoint.x < this.model.getPosition().x ) return false;
+        if ( testPoint.x > this.model.getPosition().x + EnemyView_Dreadnought.WIDTH ) return false;
+        
+        if ( testPoint.y < this.model.getPosition().y ) return false;
+        if ( testPoint.y > this.model.getPosition().y + EnemyView_Dreadnought.HEIGHT ) return false;
+        
+        return true;
+    }
+    
+    @Override
+    public Explosion createExplosion() {
+        return new ExplosionView_Ship();
     }
 }
