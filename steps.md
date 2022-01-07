@@ -84,5 +84,36 @@ by using the new BulletGenerator class.
 
 Time needed to complete this step: 250 minutes (mainly due to quite some design changes throughout)
 
-Visual rend result: see /recordings/step3_bullets.gif
-Visual rend result stress test: see /recordings/step3_bullets_stress.gif
+Visual end result: see /recordings/step3_bullets.gif
+Visual end result stress test: see /recordings/step3_bullets_stress.gif
+
+# Step 4: Graphics
+
+Now that we have the basics of the game mechanics working, we want to make the game look a bit better.
+
+There are tons of websites where you can find free to use game assets.
+I used the following sets:
+https://opengameart.org/content/space-shooter-redux
+https://opengameart.org/content/space-shooter-extension-250
+https://opengameart.org/content/explosion-effect-pixel-art
+
+Now, we are going to re-use the same image a lot (especially for the bullets/explosions),
+so we don't want to be loading the image from the hard disk each time it's needed.
+
+Instead, we want to have a central ImageController that loads them just once, 
+and we can then re-use them when needed in the different Views.
+
+We don't want to have to pass the ImageController in the constructor of all our views, that would be tedious.
+Instead, we will make it a static class with a static list of images, so we can access it anywhere more easily.
+Normally, you would use something called a "Singleton" for this, but since this is an introductory course, 
+we keep it simpler for now.
+
+We also add a gently scrolling background.
+
+Time needed to complete this step: 105 minutes (most of it searching and editing images)
+
+Visual end result: see /recordings/step4_graphics.gif
+Visual end result stress test: see /recordings/step4_graphics_stress.gif
+
+
+Total time to get to this result: 575 minutes or 9.5 hours

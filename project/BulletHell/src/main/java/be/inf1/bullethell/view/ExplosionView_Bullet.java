@@ -4,8 +4,13 @@
  */
 package be.inf1.bullethell.view;
 
+import be.inf1.bullethell.App;
 import be.inf1.bullethell.GameLoop;
+import be.inf1.bullethell.ImageController;
+import be.inf1.bullethell.model.LoadedImage;
 import be.inf1.bullethell.model.Vector2;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -29,13 +34,18 @@ public class ExplosionView_Bullet extends Explosion {
         
     @Override
     public void setup(Vector2 position) {
-        // TODO: this is just a placeholder, want to replace with an actual image later on
-        this.circle = new Circle(0, 0, HEIGHT / 2);
-        this.circle.setFill( Color.BLACK );
-        this.getChildren().add(this.circle);
+        Image image = ImageController.getImage(LoadedImage.Type.EXPLOSION_1);
         
-        this.setTranslateX( position.x );
-        this.setTranslateY( position.y );
+        // see https://docs.oracle.com/javase/8/javafx/api/javafx/scene/image/ImageView.html
+        ImageView iv = new ImageView( image );
+        iv.setFitWidth( 45 );
+        iv.setPreserveRatio(true);
+        iv.setSmooth(true);
+        
+        this.getChildren().add(iv);
+        
+        this.setTranslateX( position.x - 22 );
+        this.setTranslateY( position.y - 22 );
         
         this.update();
     }
@@ -49,11 +59,6 @@ public class ExplosionView_Bullet extends Explosion {
     public boolean update(){
         
         this.duration++;
-        
-        // halfway through, change explosion color to RED
-        if ( this.duration == Math.round(GameLoop.FRAMES_PER_SECOND / 2) ) {
-            this.circle.setFill( Color.RED );
-        }
         
         if ( this.duration > GameLoop.FRAMES_PER_SECOND ) { // show for 1 second, which is 30 frames' worth of updates
             return false;

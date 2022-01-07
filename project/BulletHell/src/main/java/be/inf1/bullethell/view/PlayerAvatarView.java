@@ -4,9 +4,13 @@
  */
 package be.inf1.bullethell.view;
 
+import be.inf1.bullethell.ImageController;
 import be.inf1.bullethell.model.Bullet;
+import be.inf1.bullethell.model.LoadedImage;
 import be.inf1.bullethell.model.Player;
 import be.inf1.bullethell.model.Vector2;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -19,8 +23,8 @@ import javafx.scene.shape.Rectangle;
 public class PlayerAvatarView extends SpaceshipView {
     private Player model;
     
-    private static int WIDTH = 100;
-    private static int HEIGHT = 30;
+    private static int WIDTH = 60;
+    private static int HEIGHT = 75;
 
     public PlayerAvatarView(Player model) {
         super(model);
@@ -34,10 +38,28 @@ public class PlayerAvatarView extends SpaceshipView {
     }
     
     public void setup() {
-        // TODO: this is just a placeholder, want to replace with an actual image later on
-        Rectangle r = new Rectangle( 0, 0, PlayerAvatarView.WIDTH, PlayerAvatarView.HEIGHT);
-        r.setFill( this.model.getColor() );
-        this.getChildren().add(r);
+  
+        // re-enable this code to show the "hitbox"
+//         Rectangle r = new Rectangle( 0, 0, PlayerAvatarView.WIDTH, PlayerAvatarView.HEIGHT);
+//         r.setFill( this.model.getColor() );
+//         this.getChildren().add(r);
+        
+        Image image = null;
+        if ( this.model.getColor() == Color.GREEN ) {
+            image = ImageController.getImage(LoadedImage.Type.PLAYER_GREEN);
+        }
+        else {
+            image = ImageController.getImage(LoadedImage.Type.PLAYER_BLUE);
+        }
+        
+        // see https://docs.oracle.com/javase/8/javafx/api/javafx/scene/image/ImageView.html
+        ImageView iv = new ImageView( image );
+        iv.setRotate(90); // the player images are facing UP by default, we want them facing RIGHT 
+        iv.setFitWidth( 99 ); // we don't use PlayerAvatarView.WIDTH because we want the hitbox to be a bit smaller than the actual image
+        iv.setPreserveRatio(true);
+        iv.setSmooth(true);
+        
+        this.getChildren().add(iv);
         
         this.update();
     }

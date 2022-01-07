@@ -49,6 +49,8 @@ public class GameViewController implements Initializable {
     
     private boolean DEBUG_stressTest = false;
     
+    private BackgroundView background;
+    
     @FXML
     private AnchorPane levelContainer;
     
@@ -71,6 +73,11 @@ public class GameViewController implements Initializable {
         
         this.laserBulletGenerator = new BulletGenerator_Laser(this.bulletController);
         this.rocketBulletGenerator = new BulletGenerator_SinRocket(this.bulletController);
+        
+        ImageController.preloadImages();
+        
+        this.background = new BackgroundView();
+        this.levelContainer.getChildren().add(this.background);
         
         KeyboardInput player1Input = new KeyboardInput( KeyCode.UP, KeyCode.DOWN, KeyCode.LEFT, KeyCode.RIGHT, KeyCode.SPACE );
         this.createPlayer("Player 1", Color.GREEN, new Vector2(100, 100), player1Input );
@@ -204,6 +211,8 @@ public class GameViewController implements Initializable {
     }
     
     private void updateViews() {
+        this.background.update();
+        
         for ( SpaceshipController p : this.players ) {
             p.updateViews();
         }

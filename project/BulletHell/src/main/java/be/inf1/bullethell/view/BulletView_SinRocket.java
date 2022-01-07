@@ -5,12 +5,16 @@
 package be.inf1.bullethell.view;
 
 import be.inf1.bullethell.GameLoop;
+import be.inf1.bullethell.ImageController;
 import be.inf1.bullethell.model.Bullet;
 import be.inf1.bullethell.model.Collidable;
 import be.inf1.bullethell.model.Collision;
 import be.inf1.bullethell.model.Enemy;
+import be.inf1.bullethell.model.LoadedImage;
 import be.inf1.bullethell.model.Player;
 import be.inf1.bullethell.model.Vector2;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Polygon;
@@ -21,7 +25,7 @@ import javafx.scene.shape.Rectangle;
  * @author u0143348
  */
 public class BulletView_SinRocket extends BulletView {  
-    private static int WIDTH = 20;
+    private static int WIDTH = 35;
     private static int HEIGHT = 20;
     
     private static int HALF_WIDTH = WIDTH / 2;
@@ -37,25 +41,30 @@ public class BulletView_SinRocket extends BulletView {
     
     @Override
     public void setup() {
-        // TODO: this is just a placeholder, want to replace with an actual image later on
-        Polygon p = new Polygon();
-        // going left
-        if ( this.model.getVelocity().x <= 0 ) {
-            p.getPoints().addAll(new Double[]{
-                0.0, (double) HALF_HEIGHT,
-                (double) WIDTH, 0.0,
-                (double) WIDTH, (double) HEIGHT });
+        // re-enable this code to show the "hitbox"
+//        Rectangle r = new Rectangle( 0, 0, BulletView_SinRocket.WIDTH, BulletView_SinRocket.HEIGHT);
+//        r.setFill( Color.DEEPPINK );
+//        this.getChildren().add(r);
+
+        Image image = ImageController.getImage(LoadedImage.Type.BULLET_ROCKET);
+        ImageView iv = new ImageView( image );
+        // the rockets are facing UP, we want them facing left or right
+        if ( this.model.getShooter().getDirection().x >= 0 ) {
+            // facing RIGHT
+            iv.setRotate(90); 
         }
-        // going right
         else {
-            p.getPoints().addAll(new Double[]{
-                0.0, 0.0,
-                (double) WIDTH, (double) HALF_HEIGHT,
-                0.0, (double) WIDTH });
+            // facing LEFT
+            iv.setRotate(-90); 
         }
+        iv.setFitWidth( 20 );
+        iv.setPreserveRatio(true);
+        iv.setSmooth(true);
         
-        p.setFill( Color.PURPLE );
-        this.getChildren().add(p);
+        iv.setY( -5 ); // make the rocket visually fit the hitbox a bit better
+        iv.setX( 5 );
+        
+        this.getChildren().add(iv);
         
         this.update();
     }
